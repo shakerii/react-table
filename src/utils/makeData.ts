@@ -5,14 +5,14 @@ const getNewPerson = (): Person => {
   return {
     firstName: faker.person.firstName(),
     lastName: faker.person.lastName(),
-    age: faker.number.int(40),
+    age: faker.number.int({ min: 20, max: 40 }),
     visits: faker.number.int(1000),
     progress: faker.number.int(100),
     status: faker.helpers.shuffle<Person["status"]>([
       "relationship",
       "complicated",
       "single",
-    ])[0]!,
+    ])[0],
   };
 };
 

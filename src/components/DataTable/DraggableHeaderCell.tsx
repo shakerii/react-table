@@ -8,6 +8,7 @@ import {
 } from "@tanstack/react-table";
 import DragHandleIcon from "@mui/icons-material/DragHandle";
 import { useDrag, useDrop } from "react-dnd";
+import { Filter } from "./Filter";
 
 type Props<TData> = {
   header: Header<TData, unknown>;
@@ -27,7 +28,7 @@ const reorderColumn = (
   return [...columnOrder];
 };
 
-export const DraggableColumnHeader = <TData,>({
+export const DraggableHeaderCell = <TData,>({
   header,
   table,
 }: Props<TData>) => {
@@ -66,11 +67,23 @@ export const DraggableColumnHeader = <TData,>({
         justifyContent="space-between"
         alignItems="center"
         ref={previewRef}
+        sx={
+          header.column.getCanSort()
+            ? { cursor: "pointer", userSelect: "none" }
+            : undefined
+        }
+        onClick={header.column.getToggleSortingHandler()}
       >
         <Grid item>
-          {header.isPlaceholder
-            ? null
-            : flexRender(header.column.columnDef.header, header.getContext())}
+          {header.isPlaceholder ? null : (
+            <Grid>
+              {flexRender(header.column.columnDef.header, header.getContext())}
+              {{
+                asc: " 🔼",
+                desc: " 🔽",
+              }[header.column.getIsSorted() as string] ?? null}
+            </Grid>
+          )}
         </Grid>
         <Grid item>
           <IconButton
@@ -81,6 +94,16 @@ export const DraggableColumnHeader = <TData,>({
           </IconButton>
         </Grid>
       </Grid>
+      {header.column.getCanFilter() && (
+        <Filter
+          type={
+            header.column.columnDef.filterFn === "inNumberRange"
+              ? "range"
+              : "text"
+          }
+          column={header.column}
+        />
+      )}
     </TableCell>
   );
 };
