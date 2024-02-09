@@ -38,12 +38,10 @@ const columns: Columns<Person> = [
     id: "status",
     accessorKey: "status",
     header: "Status",
-    cell:
-      ({ cell }) =>
-      () => {
-        const value = cell.getValue<string | undefined>();
-        return value && capitalizeFirstLetter(value);
-      },
+    cell: ({ cell }) => {
+      const value = cell.getValue<string | undefined>();
+      return value && capitalizeFirstLetter(value);
+    },
     filterFn: "arrIncludes",
   },
   {

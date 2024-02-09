@@ -1,4 +1,5 @@
 import {
+  Checkbox,
   Grid,
   Paper,
   Table,
@@ -14,6 +15,7 @@ import {
   ColumnFiltersState,
   ColumnOrderState,
   GroupingState,
+  RowSelectionState,
   flexRender,
   getCoreRowModel,
   getExpandedRowModel,
@@ -46,6 +48,7 @@ export const DataTable = <TData,>({ data, columns }: Props<TData>) => {
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [grouping, setGrouping] = useState<GroupingState>([]);
   const [globalFilter, setGlobalFilter] = useState("");
+  const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
 
   const table = useReactTable({
     data,
@@ -55,6 +58,7 @@ export const DataTable = <TData,>({ data, columns }: Props<TData>) => {
       columnFilters,
       globalFilter,
       grouping,
+      rowSelection,
     },
     filterFns: {
       fuzzy: fuzzyFilter,
@@ -62,10 +66,12 @@ export const DataTable = <TData,>({ data, columns }: Props<TData>) => {
     sortingFns: {
       fuzzy: fuzzySort,
     },
+    enableRowSelection: true,
     onColumnOrderChange: setColumnOrder,
     onColumnFiltersChange: setColumnFilters,
     onGlobalFilterChange: setGlobalFilter,
     onGroupingChange: setGrouping,
+    onRowSelectionChange: setRowSelection,
     globalFilterFn: fuzzyFilter,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
@@ -93,6 +99,13 @@ export const DataTable = <TData,>({ data, columns }: Props<TData>) => {
           <TableHead>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
+                <TableCell>
+                  <Checkbox
+                    checked={table.getIsAllRowsSelected()}
+                    indeterminate={table.getIsSomeRowsSelected()}
+                    onChange={table.getToggleAllRowsSelectedHandler()}
+                  />
+                </TableCell>
                 {headerGroup.headers.map((header) => (
                   <HeaderCell key={header.id} header={header} table={table} />
                 ))}
@@ -102,6 +115,23 @@ export const DataTable = <TData,>({ data, columns }: Props<TData>) => {
           <TableBody>
             {table.getRowModel().rows.map((row) => (
               <TableRow key={row.id}>
+                <TableCell>
+                  {row.getIsGrouped() ? (
+                    <Checkbox
+                      checked={row.getIsAllSubRowsSelected()}
+                      disabled={!row.getCanSelectSubRows()}
+                      indeterminate={row.getIsSomeSelected()}
+                      onChange={row.getToggleSelectedHandler()}
+                    />
+                  ) : (
+                    <Checkbox
+                      checked={row.getIsSelected()}
+                      disabled={!row.getCanSelect()}
+                      indeterminate={row.getIsSomeSelected()}
+                      onChange={row.getToggleSelectedHandler()}
+                    />
+                  )}
+                </TableCell>
                 {row.getVisibleCells().map((cell) => (
                   <TableCell
                     key={cell.id}
