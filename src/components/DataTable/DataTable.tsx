@@ -129,15 +129,12 @@ export const DataTable = <TData,>({ data, columns }: Props<TData>) => {
                         </Typography>
                       </Grid>
                     ) : cell.getIsAggregated() ? (
-                      // If the cell is aggregated, use the Aggregated
-                      // renderer for cell
                       flexRender(
                         cell.column.columnDef.aggregatedCell ??
                           cell.column.columnDef.cell,
                         cell.getContext()
                       )
-                    ) : cell.getIsPlaceholder() ? null : ( // For cells with repeated values, render null
-                      // Otherwise, just render the regular cell
+                    ) : cell.getIsPlaceholder() ? null : (
                       flexRender(cell.column.columnDef.cell, cell.getContext())
                     )}
                   </TableCell>

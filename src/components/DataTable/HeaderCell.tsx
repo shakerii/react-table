@@ -53,14 +53,22 @@ export const HeaderCell = <TData,>({ header, table }: Props<TData>) => {
   };
 
   const { getState, setColumnOrder, setGrouping } = table;
-  const { columnOrder } = getState();
+  const { columnOrder, grouping } = getState();
   const { column } = header;
-
-  setGrouping(["", ""]);
 
   const [, dropRef] = useDrop({
     accept: "column",
     drop: (draggedColumn: Column<TData>) => {
+      const isGrouped = draggedColumn.getIsGrouped();
+      if (isGrouped) {
+        const newGrouping = reorderColumn(
+          draggedColumn.id,
+          column.id,
+          grouping
+        );
+        setGrouping(newGrouping);
+        return;
+      }
       const newColumnOrder = reorderColumn(
         draggedColumn.id,
         column.id,

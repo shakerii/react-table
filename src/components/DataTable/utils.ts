@@ -19,7 +19,6 @@ export const fuzzySort = <TData>(
 ) => {
   let dir = 0;
 
-  // Only sort by rank if the column has ranking information
   if (rowA.columnFiltersMeta[columnId]) {
     dir = compareItems(
       rowA.columnFiltersMeta[columnId]?.itemRank,
@@ -27,7 +26,6 @@ export const fuzzySort = <TData>(
     );
   }
 
-  // Provide an alphanumeric fallback for when the item ranks are equal
   return dir === 0 ? sortingFns.alphanumeric(rowA, rowB, columnId) : dir;
 };
 
