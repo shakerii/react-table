@@ -20,7 +20,6 @@ export const TextFilterInput = <TData,>({ column }: Props<TData>) => {
       value={(columnFilterValue ?? "") as string}
       onChange={handleChange}
       placeholder={`Search...`}
-      className="w-36 border shadow rounded"
     />
   );
 };

@@ -1,22 +1,16 @@
-import { Column } from "@tanstack/react-table";
+import { Column, FilterFnOption } from "@tanstack/react-table";
 import { TextFilterInput } from "./TextFilterInput";
 import { RangeFilterInput } from "./RangeFilterInput";
-import { useEffect } from "react";
-
-const inputs = {
-  text: TextFilterInput,
-  range: RangeFilterInput,
-};
 
 type Props<TData> = {
-  type: keyof typeof inputs;
+  type: FilterFnOption<TData> | undefined;
   column: Column<TData, unknown>;
 };
 
 export const Filter = <TData,>({ type, column }: Props<TData>) => {
-  const Input = inputs[type];
+  if (type === "inNumberRange") {
+    return <RangeFilterInput column={column} />;
+  }
 
-  useEffect(() => console.log("Rerendering FILTER"), [column, type]);
-
-  return <Input column={column} />;
+  return <TextFilterInput column={column} />;
 };

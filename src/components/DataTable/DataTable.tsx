@@ -8,25 +8,31 @@ import {
   TableHead,
   TablePagination,
   TableRow,
+  Typography,
 } from "@mui/material";
 import {
   ColumnFiltersState,
   ColumnOrderState,
+  GroupingState,
   flexRender,
   getCoreRowModel,
+  getExpandedRowModel,
   getFacetedMinMaxValues,
   getFacetedRowModel,
   getFacetedUniqueValues,
   getFilteredRowModel,
+  getGroupedRowModel,
   getPaginationRowModel,
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
 import { useState } from "react";
 import { Columns } from "./types";
-import { DraggableHeaderCell } from "./DraggableHeaderCell";
-import { fuzzyFilter, fuzzySort } from "./utils";
+import { HeaderCell } from "./HeaderCell";
+import { fuzzyFilter, fuzzySort, getTableCellBackgroundColor } from "./utils";
 import { DebouncedInput } from "../DebouncedInput";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 
 type Props<TData> = {
   data: TData[];
@@ -38,6 +44,7 @@ export const DataTable = <TData,>({ data, columns }: Props<TData>) => {
     columns.map((column) => column.id as string)
   );
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [grouping, setGrouping] = useState<GroupingState>([]);
   const [globalFilter, setGlobalFilter] = useState("");
 
   const table = useReactTable({
@@ -47,6 +54,7 @@ export const DataTable = <TData,>({ data, columns }: Props<TData>) => {
       columnOrder,
       columnFilters,
       globalFilter,
+      grouping,
     },
     filterFns: {
       fuzzy: fuzzyFilter,
@@ -55,16 +63,19 @@ export const DataTable = <TData,>({ data, columns }: Props<TData>) => {
       fuzzy: fuzzySort,
     },
     onColumnOrderChange: setColumnOrder,
-    getCoreRowModel: getCoreRowModel(),
     onColumnFiltersChange: setColumnFilters,
     onGlobalFilterChange: setGlobalFilter,
+    onGroupingChange: setGrouping,
     globalFilterFn: fuzzyFilter,
+    getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getFacetedRowModel: getFacetedRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),
     getFacetedMinMaxValues: getFacetedMinMaxValues(),
+    getExpandedRowModel: getExpandedRowModel(),
+    getGroupedRowModel: getGroupedRowModel(),
     debugTable: true,
     debugHeaders: true,
     debugColumns: true,
@@ -83,11 +94,7 @@ export const DataTable = <TData,>({ data, columns }: Props<TData>) => {
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => (
-                  <DraggableHeaderCell
-                    key={header.id}
-                    header={header}
-                    table={table}
-                  />
+                  <HeaderCell key={header.id} header={header} table={table} />
                 ))}
               </TableRow>
             ))}
@@ -96,8 +103,43 @@ export const DataTable = <TData,>({ data, columns }: Props<TData>) => {
             {table.getRowModel().rows.map((row) => (
               <TableRow key={row.id}>
                 {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id}>
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  <TableCell
+                    key={cell.id}
+                    sx={{
+                      cursor: row.getCanExpand() ? "pointer" : "normal",
+                      backgroundColor: getTableCellBackgroundColor(cell),
+                    }}
+                    onClick={row.getToggleExpandedHandler()}
+                  >
+                    {cell.getIsGrouped() ? (
+                      <Grid container gap={1} flexWrap="nowrap">
+                        {row.getIsExpanded() ? (
+                          <ExpandMoreIcon />
+                        ) : (
+                          <ExpandLessIcon />
+                        )}
+                        <Typography variant="body1">
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext()
+                          )}
+                        </Typography>
+                        <Typography variant="subtitle2">
+                          ({row.subRows.length})
+                        </Typography>
+                      </Grid>
+                    ) : cell.getIsAggregated() ? (
+                      // If the cell is aggregated, use the Aggregated
+                      // renderer for cell
+                      flexRender(
+                        cell.column.columnDef.aggregatedCell ??
+                          cell.column.columnDef.cell,
+                        cell.getContext()
+                      )
+                    ) : cell.getIsPlaceholder() ? null : ( // For cells with repeated values, render null
+                      // Otherwise, just render the regular cell
+                      flexRender(cell.column.columnDef.cell, cell.getContext())
+                    )}
                   </TableCell>
                 ))}
               </TableRow>

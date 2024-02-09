@@ -25,6 +25,7 @@ const columns: Columns<Person> = [
     id: "progress",
     accessorKey: "progress",
     header: "Progress",
+    aggregationFn: "mean",
     filterFn: "inNumberRange",
   },
   {
@@ -37,7 +38,12 @@ const columns: Columns<Person> = [
     id: "status",
     accessorKey: "status",
     header: "Status",
-    cell: ({ cell }) => capitalizeFirstLetter(cell.getValue<string>()),
+    cell:
+      ({ cell }) =>
+      () => {
+        const value = cell.getValue<string | undefined>();
+        return value && capitalizeFirstLetter(value);
+      },
     filterFn: "arrIncludes",
   },
   {

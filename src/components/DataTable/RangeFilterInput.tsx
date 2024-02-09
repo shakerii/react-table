@@ -30,9 +30,10 @@ export const RangeFilterInput = <TData,>({ column }: Props<TData>) => {
   return (
     <Grid
       container
-      justifyContent="center"
+      justifyContent="space-between"
       alignItems="center"
       flexWrap="nowrap"
+      width="100%"
       gap={1}
     >
       <Grid item>
